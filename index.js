@@ -1,9 +1,12 @@
+<<<<<<< HEAD
 /**
  * Bot WhatsApp — Sistema multi-cliente
  * Replica exactamente la lógica de Claude Code + Chrome
  * con Baileys como transporte y Claude API como cerebro
  */
 
+=======
+>>>>>>> 39bf49c97c7a1c8ed669b9938b0cda3150081223
 const {
   default: makeWASocket,
   useMultiFileAuthState,
@@ -22,6 +25,7 @@ const CLIENTE_ID = process.env.CLIENTE_ID || 'chocolate_pasion'
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY
 const PORT = process.env.PORT || 3000
 
+<<<<<<< HEAD
 // Cargar config del cliente
 const configPath = path.join(__dirname, 'clientes', CLIENTE_ID, 'config.json')
 const config = JSON.parse(fs.readFileSync(configPath, 'utf8'))
@@ -38,6 +42,13 @@ const crm = {}
 const conversaciones = {}
 
 // ─── SERVIDOR WEB PARA QR ────────────────────────────────────────────────────
+=======
+const configPath = path.join(__dirname, 'config', `${CLIENTE_ID}.json`)
+const config = JSON.parse(fs.readFileSync(configPath, 'utf8'))
+const conversaciones = {}
+
+// ─── SERVIDOR WEB PARA VER EL QR ─────────────────────────────────────────────
+>>>>>>> 39bf49c97c7a1c8ed669b9938b0cda3150081223
 const app = express()
 let qrActual = null
 let botConectado = false
@@ -47,7 +58,11 @@ app.get('/', async (req, res) => {
     return res.send(`
       <html><body style="font-family:sans-serif;text-align:center;padding:40px;background:#0a0a0a;color:#fff">
         <h1 style="color:#25D366">✅ Bot conectado</h1>
+<<<<<<< HEAD
         <p><strong>${config.nombre_negocio}</strong> está activo y recibiendo mensajes.</p>
+=======
+        <p>El bot de <strong>${config.nombre_negocio}</strong> está activo y recibiendo mensajes.</p>
+>>>>>>> 39bf49c97c7a1c8ed669b9938b0cda3150081223
       </body></html>
     `)
   }
@@ -55,6 +70,7 @@ app.get('/', async (req, res) => {
     return res.send(`
       <html><head><meta http-equiv="refresh" content="3"></head>
       <body style="font-family:sans-serif;text-align:center;padding:40px;background:#0a0a0a;color:#fff">
+<<<<<<< HEAD
         <h2>⏳ Generando QR...</h2><p>Espera unos segundos, esta página se actualiza sola.</p>
       </body></html>
     `)
@@ -229,6 +245,33 @@ async function llamarClaude(textoNuevo, numero) {
   conversaciones[numero].push({ role: 'assistant', content: respuestaLimpia })
   return respuestaLimpia
 }
+=======
+        <h2>⏳ Generando QR...</h2>
+        <p>Esta página se actualiza sola. Espera unos segundos.</p>
+      </body></html>
+    `)
+  }
+  try {
+    const qrImg = await QRCode.toDataURL(qrActual, { width: 400, margin: 2 })
+    res.send(`
+      <html><head><meta http-equiv="refresh" content="25"></head>
+      <body style="font-family:sans-serif;text-align:center;padding:40px;background:#0a0a0a;color:#fff">
+        <h2 style="color:#25D366">📱 Escanea este QR con WhatsApp</h2>
+        <img src="${qrImg}" style="border:8px solid white;border-radius:12px;max-width:380px"/>
+        <p style="color:#aaa;margin-top:20px">WhatsApp → 3 puntos → Dispositivos vinculados → Vincular dispositivo</p>
+        <p style="color:#666;font-size:13px">Esta página se actualiza cada 25 segundos con el QR más reciente</p>
+      </body></html>
+    `)
+  } catch (e) {
+    res.send('Error generando QR: ' + e.message)
+  }
+})
+
+app.listen(PORT, () => {
+  console.log(`\n🌐 Abre esta URL para escanear el QR:`)
+  console.log(`   (Railway te da la URL pública en Settings > Networking)\n`)
+})
+>>>>>>> 39bf49c97c7a1c8ed669b9938b0cda3150081223
 
 // ─── BOT WHATSAPP ─────────────────────────────────────────────────────────────
 async function conectarWhatsApp() {
@@ -257,8 +300,14 @@ async function conectarWhatsApp() {
     if (qr) {
       qrActual = qr
       botConectado = false
+<<<<<<< HEAD
       console.log('📱 QR generado — abre la URL para escanearlo')
     }
+=======
+      console.log('📱 QR generado — abre la URL de Railway para escanearlo')
+    }
+
+>>>>>>> 39bf49c97c7a1c8ed669b9938b0cda3150081223
     if (connection === 'close') {
       botConectado = false
       const codigo = lastDisconnect?.error?.output?.statusCode
@@ -269,10 +318,18 @@ async function conectarWhatsApp() {
         setTimeout(conectarWhatsApp, 5000)
       }
     }
+<<<<<<< HEAD
     if (connection === 'open') {
       qrActual = null
       botConectado = true
       console.log(`\n✅ BOT CONECTADO — ${config.nombre_negocio}\n`)
+=======
+
+    if (connection === 'open') {
+      qrActual = null
+      botConectado = true
+      console.log(`✅ BOT CONECTADO — ${config.nombre_negocio}`)
+>>>>>>> 39bf49c97c7a1c8ed669b9938b0cda3150081223
     }
   })
 
@@ -293,6 +350,7 @@ async function conectarWhatsApp() {
 
       try {
         await sock.sendPresenceUpdate('available', msg.key.remoteJid)
+<<<<<<< HEAD
         await delay(randomEntre(1000, 2500))
         await sock.sendPresenceUpdate('composing', msg.key.remoteJid)
 
@@ -308,11 +366,31 @@ async function conectarWhatsApp() {
             await delay(randomEntre(700, 1800))
             await sock.sendPresenceUpdate('composing', msg.key.remoteJid)
             await delay(randomEntre(800, 2000))
+=======
+        await delay(randomEntre(1000, 3000))
+        await sock.sendPresenceUpdate('composing', msg.key.remoteJid)
+
+        const respuesta = await llamarClaude(texto, numero, config)
+        const palabras = respuesta.split(' ').length
+        await delay(Math.min(palabras * 100, 5000))
+
+        const burbujas = respuesta.split('\n---\n').map(b => b.trim()).filter(Boolean)
+        for (let i = 0; i < burbujas.length; i++) {
+          await sock.sendMessage(msg.key.remoteJid, { text: burbujas[i] })
+          if (i < burbujas.length - 1) {
+            await delay(randomEntre(800, 2000))
+            await sock.sendPresenceUpdate('composing', msg.key.remoteJid)
+            await delay(randomEntre(1000, 2500))
+>>>>>>> 39bf49c97c7a1c8ed669b9938b0cda3150081223
           }
         }
 
         await sock.readMessages([msg.key])
+<<<<<<< HEAD
         console.log(`✅ Respondido (${burbujas.length} burbuja${burbujas.length > 1 ? 's' : ''})`)
+=======
+        console.log(`✅ Respondido a ${numero}`)
+>>>>>>> 39bf49c97c7a1c8ed669b9938b0cda3150081223
 
       } catch (error) {
         console.error(`❌ Error:`, error.message)
@@ -331,8 +409,59 @@ function randomEntre(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min
 }
 
+<<<<<<< HEAD
+=======
+async function llamarClaude(textoNuevo, numero, config) {
+  if (!conversaciones[numero]) conversaciones[numero] = []
+  conversaciones[numero].push({ role: 'user', content: textoNuevo })
+  if (conversaciones[numero].length > 20) conversaciones[numero].shift()
+
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': ANTHROPIC_API_KEY,
+      'anthropic-version': '2023-06-01',
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-6',
+      max_tokens: 1000,
+      system: construirSystemPrompt(config),
+      messages: conversaciones[numero],
+    }),
+  })
+
+  if (!response.ok) throw new Error(`Claude API ${response.status}: ${await response.text()}`)
+
+  const data = await response.json()
+  const respuesta = data.content[0]?.text || 'Un momento 😊'
+  conversaciones[numero].push({ role: 'assistant', content: respuesta })
+  return respuesta
+}
+
+function construirSystemPrompt(config) {
+  return `${config.system_prompt}
+
+---
+
+## FORMATO WHATSAPP
+Responde como persona real. Sin markdown. Múltiples mensajes con \n---\n. Máximo 3 burbujas.
+
+## DATOS DEL NEGOCIO
+${JSON.stringify(config.datos_negocio, null, 2)}
+
+## INSTRUCCIONES
+${config.instrucciones_adicionales || ''}
+`
+}
+
+>>>>>>> 39bf49c97c7a1c8ed669b9938b0cda3150081223
 console.log(`\n🤖 Bot iniciando — ${CLIENTE_ID} (${config.nombre_negocio})\n`)
 conectarWhatsApp().catch(err => {
   console.error('Error fatal:', err)
   process.exit(1)
+<<<<<<< HEAD
 })
+=======
+})
+>>>>>>> 39bf49c97c7a1c8ed669b9938b0cda3150081223
